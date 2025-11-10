@@ -22,3 +22,8 @@ dreamlens/
 ├── evaluate.py
 ├── requirements.txt
 └── README.md
+
+
+# DreamLENS
+
+An AI-powered vision enhancement project designed to improve low-light image quality.
