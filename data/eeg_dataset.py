@@ -12,12 +12,14 @@ class EEGClipDataset(Dataset):
         self.data_path = data_path
         self.mode = mode
         self.granularity = granularity
+
         self.clip_model = clip_model
         self.preprocess = preprocess
         
         # Load the dataset
         if data_path.endswith('.pth'):
-            data = torch.load(data_path, map_location='cpu')
+            data = torch.load(data_path, map_location='cpu', weights_only=False)
+
         else:
             raise ValueError("Unsupported data format. Use .pth files")
         
