@@ -3,12 +3,19 @@ import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import numpy as np
 import clip
+import sys, os
 
+# Add the parent directory (DreamLENS) to the system path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import config
+from eeg_dataset import EEGClipDataset
+ 
 # Load CLIP model
 clip_model, preprocess = clip.load("ViT-B/32", device='cpu')
 
 # Load your dataset
-data_path = "EEG-ImageNet_2.pth"   # Change this to your dataset file
+data_path = r"C:\Amrita\S5 DL PROJECT DATASET\EEG-ImageNet_1.pth"   # Change this to your dataset file
 dataset = EEGClipDataset(data_path, clip_model=clip_model, preprocess=preprocess, mode='train', granularity='both')
 
 # ---- Basic Stats ----
