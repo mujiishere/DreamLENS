@@ -6,7 +6,7 @@ class CNNEncoder(nn.Module):
     """
     CNN for EEG feature extraction
     """
-    def __init__(self, input_channels=128, hidden_dim=256):
+    def __init__(self, input_channels=62, hidden_dim=256):
         super(CNNEncoder, self).__init__()
         
         self.conv1 = nn.Conv1d(input_channels, 128, kernel_size=7, stride=2, padding=3)
@@ -35,14 +35,16 @@ class CNNEncoder(nn.Module):
         
         return x
 
+
 class EEGToClipModel(nn.Module):
     """
     Map EEG signals to CLIP embedding space
     """
-    def __init__(self, eeg_channels=128, eeg_timepoints=440, 
+    def __init__(self, eeg_channels=62, eeg_timepoints=440, 
                  embedding_dim=512, pretrained_model_path=None):
         super(EEGToClipModel, self).__init__()
         
+        # ✅ Changed eeg_channels to 62
         self.eeg_encoder = CNNEncoder(input_channels=eeg_channels, hidden_dim=512)
         
         # Mapping to CLIP embedding space
@@ -65,7 +67,8 @@ class EEGToClipModel(nn.Module):
     def load_pretrained_weights(self, model_path):
         """Load pretrained EEG-ImageNet weights"""
         try:
-            checkpoint = torch.load(model_path, map_location='cpu')
+            # ✅ Add weights_only=False to match PyTorch 2.6+ behavior
+            checkpoint = torch.load(model_path, map_location='cpu', weights_only=False)
             
             # Handle different checkpoint formats
             if 'state_dict' in checkpoint:
@@ -84,11 +87,9 @@ class EEGToClipModel(nn.Module):
                 if name in model_state_dict and model_state_dict[name].shape == v.shape:
                     loaded_state_dict[name] = v
                 else:
-                    # Try to handle dimension mismatches
                     if name in model_state_dict:
                         if len(v.shape) == len(model_state_dict[name].shape):
                             if v.shape[0] == model_state_dict[name].shape[0]:
-                                # Same output dimension, different input
                                 min_dim = min(v.shape[1], model_state_dict[name].shape[1])
                                 loaded_state_dict[name] = model_state_dict[name]
                                 loaded_state_dict[name][:, :min_dim] = v[:, :min_dim]
@@ -102,13 +103,7 @@ class EEGToClipModel(nn.Module):
             print("Initializing with random weights")
     
     def forward(self, eeg_data):
-        # Encode EEG
         eeg_features = self.eeg_encoder(eeg_data)
-        
-        # Map to embedding space
         embeddings = self.embedding_mapper(eeg_features)
-        
-        # Normalize embeddings (like CLIP)
         embeddings = F.normalize(embeddings, p=2, dim=1)
-        
         return embeddings

@@ -248,9 +248,10 @@ def main():
                 'train_history': train_history,
                 'val_history': val_history,
                 'best_val_loss': best_val_loss,
-                'config': Config.__dict__
+                'config': {k: v for k, v in Config.__dict__.items() if not k.startswith("__") and not callable(v)}
             }
             torch.save(checkpoint, os.path.join(args.save_dir, 'best_model.pth'))
+
             print(f"Saved best model with val_loss: {val_loss:.4f}")
         
         # Save checkpoint every 10 epochs
@@ -260,10 +261,13 @@ def main():
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'train_history': train_history,
-                'val_history': val_history
+                'val_history': val_history,
+                'config': {k: v for k, v in Config.__dict__.items() if not k.startswith("__") and not callable(v)},
+
             }
-            torch.save(checkpoint, os.path.join(args.save_dir, f'checkpoint_epoch_{epoch}.pth'))
-            
+            os.makedirs(args.save_dir, exist_ok=True)
+            torch.save(checkpoint, os.path.join(args.save_dir, 'best_model.pth'))
+
             # Plot training history
             plot_training_history(
                 train_history, val_history,

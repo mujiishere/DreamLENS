@@ -2,13 +2,13 @@ import torch
 
 class Config:
     # Data parameters
-    EEG_CHANNELS = 128
+    EEG_CHANNELS = 62
     EEG_TIMEPOINTS = 440
     LATENT_DIM = 512
     EMBEDDING_DIM = 512  # CLIP embedding dimension
     
     # Model parameters
-    PRETRAINED_MODEL_PATH = "C:\Users\mirro\Downloads\EEG-ImageNet_2.pth"
+    PRETRAINED_MODEL_PATH = r"C:\Amrita\S5 DL PROJECT DATASET\EEG-ImageNet_1.pth"
     
     # Training parameters
     BATCH_SIZE = 32
