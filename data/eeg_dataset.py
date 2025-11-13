@@ -58,13 +58,37 @@ class EEGClipDataset(Dataset):
         return {label: embedding for label, embedding in zip(unique_labels, text_features)}
     
     def _imagenet_label_to_text(self, labels):
-        """Convert ImageNet labels to descriptive text prompts"""
+        """Convert WordNet IDs to descriptive text using local map.txt"""
+        mapping = {}
+
+        # --- Load map.txt once ---
+        map_path = os.path.join(os.path.dirname(__file__), "map.txt")
+        if os.path.exists(map_path):
+            with open(map_path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    parts = line.split("\t")
+                    if len(parts) >= 2:
+                        wnid = parts[0].strip()
+                        name = parts[1].strip()
+                        mapping[wnid] = name
+        else:
+            print(f"⚠️ map.txt not found at {map_path}, using fallback labels.")
+
+        # --- Build natural language prompts ---
         descriptions = []
         for label in labels:
-            # Convert label like 'n02106662' to descriptive text
-            # In practice, you might want to map these to actual class names
-            descriptions.append(f"a photo of a {label}")
+            if label in mapping:
+                name = mapping[label]
+                descriptions.append(f"a photo of a {name}")
+            else:
+                # fallback if label missing
+                descriptions.append(f"a photo of a {label}")
+
         return descriptions
+
     
     def __len__(self):
         return len(self.dataset)
